@@ -1,0 +1,5 @@
+<block>
+  <view>
+    <view wx:else></view>
+  </view>
+</block>

@@ -1,0 +1,6 @@
+<template>
+  <div>
+    <span >{{username}}</span>
+    <span >啦啦啦啦啦啦</span>
+  </div>
+</template>

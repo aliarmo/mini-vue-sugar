@@ -1,0 +1,18 @@
+<block>
+  <view>
+    <view>
+      <view>good case</view>
+      <view bindtap="onClick"></view>
+      <view catchtap="onClick"></view>
+      <view bindtouchstart="touchstart"></view>
+      <view bindtouchmove="onTouchMove"></view>
+      <view bindtouchend="touchend"></view>
+      <view bindlongtouch="longtouch"></view>
+      <view bindlongtouch="longtouch"></view>
+    </view>
+    <view>
+      <view>bad case</view>
+      <view v-on:click="onClick('t')"></view>
+    </view>
+  </view>
+</block>

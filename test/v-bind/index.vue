@@ -8,6 +8,6 @@
       style="display:block;color:red"
     ></span>
     <div :key="item.id"></div>
-    <view class="header" :class="{active:isActive}"></view>
+    <view class="header" :class="{active:isActive}">aaaaaaa</view>
   </div>
 </template>

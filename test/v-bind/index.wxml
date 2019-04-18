@@ -8,6 +8,6 @@
       
      ></view>
     <view  key="{{item.id}}"   ></view>
-    <view class="header {{isActive ? 'active' : ''}}"       ></view>
+    <view class="header {{isActive ? 'active' : ''}}"       >aaaaaaa</view>
   </view>
 </block>

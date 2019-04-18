@@ -9,6 +9,7 @@
       <view bindtouchend="touchend"></view>
       <view bindlongtouch="longtouch"></view>
       <view bindlongtouch="longtouch"></view>
+      <TestComps bindtest="onTest"></TestComps>
     </view>
     <view>
       <view>bad case</view>

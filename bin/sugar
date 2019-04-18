@@ -1,0 +1,102 @@
+#!/usr/bin/env node
+'use strict';
+
+/*<>包裹的options是必传的，使用命令的时候必须要用的，[]包裹的则是可选的*/
+
+const chokidar = require('chokidar')
+const commander = require('commander')
+const path = require('path')
+const fs = require('fs')
+let { info } = require('../modules/log')
+let { compile } = require('../modules/index')
+let meta = require('../package.json')
+let cwd = process.cwd()
+
+const sugarConfigFileName = 'sugar.config.json'
+let log = info
+let hasWatch = false
+
+let sugarConfig = {}
+try {
+	sugarConfig = require(path.resolve(sugarConfigFileName))
+} catch (err) { }
+
+cwd = cwd.replace(/\\/gm, '/')
+const watcher = chokidar.watch(`${cwd}/**/*.vue`, Object.assign({
+	persistent: true,
+	ignored: /node_modules/
+}, sugarConfig))
+
+function task() {
+	if (hasWatch) return
+	hasWatch = true
+	console.log("start compile.......\n")
+	watcher
+		.on('add', (filepath, stat) => {
+			action(filepath)
+			log(`${filepath} compile successful\n`)
+		})
+		.on('change', filepath => {
+			console.log(`File ${filepath} has been changed`)
+			action(filepath)
+			log(`re-compile successful\n`)
+		})
+		.on('unlink', filepath => {
+			log(`File ${filepath} has been removed\n`)
+		})
+		// 事件触发会导致all的触发
+		// .on('all', function (event, path) {
+		// 	console.log(event, path);
+		// })
+		.on('ready', function () {
+			// 初始扫描完成，可以等待change
+			console.log("watching.......\n")
+		})
+}
+
+function action(filepath) {
+	let template = fs.readFileSync(filepath, 'utf-8')
+	filepath = filepath.replace(/\.vue$/, '.wxml')
+	fs.writeFileSync(filepath, compile(template))
+}
+
+commander
+	.version(`v${meta.version}`, '-v, --version')
+
+//sugar c
+commander
+	.command('compile')
+	.option('--no-watch', 'no watch')
+	.alias('c')
+	.description('compile to miniprogram template sugar and watch')
+	.action(function (cmd) {
+		// cmd是commander对象
+		task()
+	})
+
+// commander
+// 	.command('release [desc] [desc1]')
+// 	.option('-r, --recursive <myVar>', 'Remove recursively')
+// 	.option('-b, --bbb <myVar2>', 'myVar2')
+// 	.option('--no-sauce', 'Remove sauce')
+// 	.alias('r')
+// 	.action(function (desc, desc1, cmd) {
+// 		console.log("desc：", desc, desc1)
+// 		console.log('cmd：', cmd.b, cmd.bbb, cmd.recursive, cmd.sauce)
+// 	})
+
+
+
+// 默认task
+commander
+	.command('*')
+	.action(function (task) {
+
+	})
+
+commander.parse(process.argv)
+
+
+if (!commander.args.length) {
+	// 没有参数的时候
+}

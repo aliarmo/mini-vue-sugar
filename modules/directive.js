@@ -51,8 +51,8 @@ let deltHtml = template => {
     let reg = new RegExp(`<[\\s\\S]+${dir}[\\s\\S]+>`)
     let matched = template.match(reg)
     if (matched && matched[0]) {
-        // throw new Error(`小程序平台不支持 ${dir} ：${matched[0]}`)
-        log.error(`小程序平台不支持 ${dir} ：\n${matched[0]}`)
+        log.error(`小程序平台不支持 ${dir} \n`)
+        log.error(`at ${options.filepath ? options.filepath + ' ' : ''}${matched[0]}\n`, { noHeader: true })
     }
     return template
 }
@@ -65,7 +65,8 @@ let deltShow = template => {
         end) => {
         if (!exp) {
             // throw new Error(`${dir} is empty in ${all}`)
-            log.error(`${dir} is empty in \n${all}`)
+            log.error(`${dir} is empty \n`)
+            log.error(`at ${options.filepath ? options.filepath + ' ' : ''}${all}\n`, { noHeader: true })
             return all
         }
         let allStyle = ''
@@ -85,13 +86,14 @@ let deltShow = template => {
     return template
 }
 
-let deltIf = template => {
+let deltIf = (template, options) => {
     let dir = 'v-if'
     template = template.replace(genReg(dir), (all,
         dirName, equalStr, leftMark, exp = '', rightMark, end) => {
         if (!exp) {
             // throw new Error(`${dir} has not expression in ${all}}`)
-            log.error(`${dir} has not expression in \n${all}}`)
+            log.error(`${dir} has not expression \n`)
+            log.error(`at ${options.filepath ? options.filepath + ' ' : ''}${all}\n`, { noHeader: true })
             return all
         }
         exp = `{{${exp}}}`
@@ -100,13 +102,13 @@ let deltIf = template => {
     return template
 }
 
-let deltElseIf = template => {
+let deltElseIf = (template, options) => {
     let dir = 'v-else-if'
     template = template.replace(genReg(dir), (all,
         dirName, equalStr, leftMark, exp = '', rightMark, end) => {
         if (!exp) {
-            // throw new Error(`${dir} has not expression in ${all}}`)
-            log.error(`${dir} has not expression in \n${all}}`)
+            log.error(`${dir} has not expression \n}`)
+            log.error(`at ${options.filepath ? options.filepath + ' ' : ''}${all}\n`, { noHeader: true })
             return all
         }
         exp = `{{${exp}}}`
@@ -121,20 +123,22 @@ let deltElse = template => {
     return template
 }
 
-let deltFor = template => {
+let deltFor = (template, options) => {
     let dir = 'v-for'
     template = template.replace(genReg(dir), (all,
-        dirName, equalStr, leftMark, exp = '', rightMark, end) => {
+        dirName, equalStr, leftMark, exp = '', rightMark, end = '') => {
         if (!exp) {
             // throw new Error(`${dir} has not expression in ${all}}`)
-            log.error(`${dir} has not expression in \n${all}}`)
+            log.error(`${dir} has not expression \n}`)
+            log.error(`at ${options.filepath ? options.filepath + ' ' : ''}${all}\n`, { noHeader: true })
             return all
         }
         exp = exp.trim()
         let matches = exp.match(/^(\(?)([\s\S]+?)(\)?)(\s+in\s+)([\s\S]+)$/)
         if (!matches) {
             // throw new Error(`${dir} expression illegal in ${all}`)
-            log.error(`${dir} expression illegal in \n${all}`)
+            log.error(`${dir} expression illegal \n`)
+            log.error(`at ${options.filepath ? options.filepath + ' ' : ''}${all}\n`, { noHeader: true })
             return all
         }
         let itemsName = matches[5]
@@ -142,27 +146,28 @@ let deltFor = template => {
         let varList = matches[2].split(',').map(name => name.trim())
         exp = `{{${itemsName}}}`
         varList[1] = varList[1] || 'index'
-        let index = `wx:for-index='${varList[1]}'`
-        let item = `wx:for-item='${varList[0]}'`
-        return `wx:for${equalStr}${leftMark}${exp}${rightMark}${end} ${item} ${index}`
+        let index = `wx:for-index="${varList[1]}"`
+        let item = `wx:for-item="${varList[0]}"`
+        return `wx:for${equalStr}${leftMark}${exp}${rightMark} ${item} ${index}${end}`
     })
     return template
 }
 
-let deltOn = template => {
+let deltOn = (template, options) => {
     let dir = 'v-on'
     let reg = new RegExp(`${dir}:([\\s\\S]+?)(\s*=\s*)(["'])([\\s\\S]+?)(\\3)`, 'gim')
     template = template.replace(reg, (all, param, equalStr, leftMark, fn, rightMark) => {
         param = param.trim()
         if (/^\[/.test(param)) {
             // throw new Error(`小程序不支持动态事件：${all}`)
-            log.error(`小程序不支持动态事件：\n${all}`)
+            log.error(`小程序不支持动态事件：\n`)
+            log.error(`at ${options.filepath ? options.filepath + ' ' : ''}${all}\n`)
             return all
         }
         fn = fn.trim()
         if (/\)$/.test(fn)) {
-            // throw new Error(`小程序不支持使用内联语句,可在元素上挂载data来传递参数：${all}`)
-            log.error(`小程序不支持使用内联语句,可在元素上挂载data来传递参数：\n${all}`)
+            log.error(`小程序不支持使用内联语句,可在元素上挂载data来传递参数：\n`)
+            log.error(`at ${options.filepath ? options.filepath + ' ' : ''}${all}\n`, { noHeader: true })
             return all
         }
         param = param.split('.').map(p => p.trim())
@@ -174,7 +179,8 @@ let deltOn = template => {
                 return true
             }
         })) {
-            log.warn(`小程序内只支持 stop 修饰符，其他修饰符将被忽略：\n${all}`)
+            log.warn(`小程序内只支持 stop 修饰符，其他修饰符将被忽略：\n`)
+            log.warn(`at ${options.filepath ? options.filepath + ' ' : ''}${all}\n`)
         }
         return `${prefix}${miniEventName}${equalStr}${leftMark}${fn}${rightMark}`
     })
@@ -183,7 +189,7 @@ let deltOn = template => {
 }
 // 注意字面量 :class="'active'"
 // class和style要进行合并
-let deltBind = template => {
+let deltBind = (template, options) => {
     let dir = 'v-bind'
 
     let dirReg = new RegExp(`(<[^>]+?\\s+)([^>]*?)(${dir}:)([^>]+?)(\\s*=\\s*)(['"])([^>]+?)(\\6)([^>]*?)(>)`, 'gim')
@@ -197,7 +203,8 @@ let deltBind = template => {
                 if (bindName.split('.').length > 1) {
                     // 说明带了修饰符，编译器支持不了修饰符
                     // throw new Error(`小程序平台不支持${dir}上使用修饰符：${all}`)
-                    log.warn(`小程序平台不支持${dir}上使用修饰符：\n${all}`)
+                    log.warn(`小程序平台不支持${dir}上使用修饰符：\n`)
+                    log.warn(`at ${options.filepath ? options.filepath + ' ' : ''}${all}\n`)
                     return all
                 }
                 mayExp = mayExp.trim()
@@ -223,7 +230,8 @@ let deltBind = template => {
                         return `class="${mayExp}"`
                     } else if (/^\[/.test(mayExp)) {
                         // v-bind:class="[activeClass, errorClass]"
-                        log.error(`小程序平台不支持 v-bind:class="[activeClass, errorClass]"形式class绑定：\n${all}`)
+                        log.error(`小程序平台不支持 v-bind:class="[activeClass, errorClass]"形式class绑定：\n`)
+                        log.error(`at ${options.filepath ? options.filepath + ' ' : ''}${all}\n`, { noHeader: true })
                         return all
                     } else {
                         return `class="{{${mayExp}}}"`
@@ -245,7 +253,8 @@ let deltBind = template => {
                     } else if (isConst) {
                         return `style="${mayExp}"`
                     } else if (/^\[/.test(mayExp)) {
-                        log.error(`小程序平台不支持 v-bind:style="[baseStyles, overridingStyles]"形式style绑定：\n${all}`)
+                        log.error(`小程序平台不支持 v-bind:style="[baseStyles, overridingStyles]"形式style绑定：\n`)
+                        log.error(`at ${options.filepath ? options.filepath + ' ' : ''}${all}\n`, { noHeader: true })
                         return all
                     } else {
                         return `style="{{${mayExp}}}"`
@@ -269,7 +278,7 @@ let deltBind = template => {
 }
 
 // 小程序不支持作用域插槽
-let deltSlot = template => {
+let deltSlot = (template, options) => {
     let dir = 'v-slot'
     let unSupportReg = new RegExp(`${dir}\\s*:\\s*[^>]+?\\s*=(["'])[^>]+?(\\1)`)
     let matches = template.match(unSupportReg)
@@ -282,7 +291,8 @@ let deltSlot = template => {
     let reg = new RegExp(`<template\s*[^>]*?${dir}(:?)([^>]*?)(\\s*>|\\s+[^>]+?>)([\\s\\S]+?)</template>`, 'gim')
     template = template.replace(reg, (all, colon, slotName, slotAfter, cnt) => {
         if (!colon) {
-            log.warn(`小程序不支持默认slot，将会被忽略：\n${all}`)
+            log.warn(`小程序不支持默认slot，将会被忽略：\n`)
+            log.warn(`at ${options.filepath ? options.filepath + ' ' : ''}${all}\n`)
             return all
         }
         cnt = cnt.replace(/(<)([^>]+?)(>)/m, (all, start, tag, end) => {
@@ -293,40 +303,43 @@ let deltSlot = template => {
     return template
 }
 
-let deltPre = template => {
+let deltPre = (template, options) => {
     let dir = 'v-pre'
     let reg = new RegExp(`<[\\s\\S]+${dir}[\\s\\S]+>`)
     let matched = template.match(reg)
     if (matched && matched[0]) {
         // throw new Error(`小程序平台不支持 ${dir} ：${matched[0]}`)
         log.error(`小程序平台不支持 ${dir} ：\n${matched[0]}`)
+        log.error(`at ${options.filepath ? options.filepath + ' ' : ''}${matched[0]}\n`, { noHeader: true })
     }
     return template
 }
 
-let deltCloak = template => {
+let deltCloak = (template, options) => {
     let dir = 'v-cloak'
     let reg = new RegExp(`<[\\s\\S]+${dir}[\\s\\S]+>`)
     let matched = template.match(reg)
     if (matched && matched[0]) {
         // throw new Error(`小程序平台不支持 ${dir} ：${matched[0]}`)
         log.error(`小程序平台不支持 ${dir} ：\n${matched[0]}`)
+        log.error(`at ${options.filepath ? options.filepath + ' ' : ''}${matched[0]}\n`, { noHeader: true })
     }
     return template
 }
 
-let deltOnce = template => {
+let deltOnce = (template, options) => {
     let dir = 'v-once'
     let reg = new RegExp(`<[\\s\\S]+${dir}[\\s\\S]+>`)
     let matched = template.match(reg)
     if (matched && matched[0]) {
         // throw new Error(`小程序平台不支持 ${dir} ：${matched[0]}`)
-        log.error(`小程序平台不支持 ${dir} ：\n${matched[0]}`)
+        log.error(`小程序平台不支持 ${dir} ：\n`)
+        log.error(`at ${options.filepath ? options.filepath + ' ' : ''}${matched[0]}\n`, { noHeader: true })
     }
     return template
 }
 
-let deltModel = template => {
+let deltModel = (template, options) => {
     let dir = 'v-model'
     // let reg = `(${dir})(\\.[\\w]?*)(\\s*=\\s*)(["'])([\\s\\S]+?)(["'])`
     // template = template.replace(reg, (all, dirName, decorator, equalStr, leftMark, exp, rightMark) => {
@@ -349,26 +362,29 @@ let deltModel = template => {
     let matched = template.match(reg)
     if (matched && matched[0]) {
         // throw new Error(`小程序平台不支持 ${dir} ：${matched[0]}，可以通过 @change="handler" :value="val" 实现`)
-        log.error(`小程序平台不支持 ${dir} ：\n${matched[0]}\n推荐使用 @change="handler" :value="val" 实现`)
+        log.error(`小程序平台不支持 ${dir} ：\n${matched[0]}\n推荐使用 @change="handler" :value="val" 实现\n`)
+        if (options.filepath) {
+            log.error(`at ${options.filepath}\n`, { noHeader: true })
+        }
     }
     return template
 }
-let deltDirective = template => {
-    let temp = deltText(template)
-    temp = deltHtml(temp)
-    temp = deltShow(temp)
-    temp = deltIf(temp)
-    temp = deltElseIf(temp)
-    temp = deltElse(temp)
-    temp = deltFor(temp)
-    temp = deltOn(temp)
-    temp = deltBind(temp)
-    temp = deltSlot(temp)
+let deltDirective = (template, options) => {
+    let temp = deltText(template, options)
+    temp = deltHtml(temp, options)
+    temp = deltShow(temp, options)
+    temp = deltIf(temp, options)
+    temp = deltElseIf(temp, options)
+    temp = deltElse(temp, options)
+    temp = deltFor(temp, options)
+    temp = deltOn(temp, options)
+    temp = deltBind(temp, options)
+    temp = deltSlot(temp, options)
 
-    temp = deltPre(temp)
-    temp = deltCloak(temp)
-    temp = deltOnce(temp)
-    temp = deltModel(temp)
+    temp = deltPre(temp, options)
+    temp = deltCloak(temp, options)
+    temp = deltOnce(temp, options)
+    temp = deltModel(temp, options)
 
     return temp
 }

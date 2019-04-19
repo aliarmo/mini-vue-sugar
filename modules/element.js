@@ -1,10 +1,16 @@
-let { elementMap, specialElement } = require('./element-config')
+let { elementMap, specialElement, selfClose } = require('./element-config')
 
 let deltElement = (template) => {
     let tagReg
     let target
     let attrReg
+    let selfCloseTagReg
     if (!template) return ''
+    // 去掉自闭合标签的关闭标签，例如：</img>
+    selfClose.forEach(tag => {
+        selfCloseTagReg = new RegExp(`<\\s*\\/${selfCloseTagReg}\\s*>`, 'gim')
+        template = template.replace(selfCloseTagReg, '')
+    })
     Object.keys(elementMap).forEach(key => {
         tagReg = new RegExp(`(<|<\\/)(${key})([\\s\\S]*?)(>)`, 'gim')
         template = template.replace(tagReg, (all, start, tag, allAttr = '', end) => {
@@ -16,7 +22,14 @@ let deltElement = (template) => {
                     allAttr = allAttr.replace(attrReg, target.attrs[originAttr])
                 })
             }
-            return `${start}${target.tag}${allAttr}${end}`
+            // 自闭合标签特殊处理
+            let patchStr = ''
+            if (~selfClose.indexOf(key)) {
+                allAttr = allAttr.replace(/\s+$/, '')
+                allAttr = allAttr.replace(/\/$/, '')
+                patchStr = `</${target}>`
+            }
+            return `${start}${target.tag}${allAttr}${end}${patchStr}`
         })
     })
     return template

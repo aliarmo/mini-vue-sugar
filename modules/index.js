@@ -1,12 +1,20 @@
 let { deltElement } = require('./element')
 let { deltDirective } = require('./directive')
 let { normalize } = require('./normalize')
+let { isTemplateLegal } = require('./validate')
+let { exit } = require('./utils')
+let deltInvoke = require('./delt-invoke')
 
-let compile = template => {
+let compile = (template, options = { filepath: '' }) => {
     template = template.trim()
     if (!template) return ''
-    let temp = normalize(template)
-    temp = deltElement(deltDirective(temp))
+    if (!isTemplateLegal(template, options)) {
+        exit()
+        return
+    }
+    let temp = normalize(template, options)
+    temp = deltElement(deltDirective(temp, options), options)
+    temp = deltInvoke(temp, options)
     return temp
 }
 

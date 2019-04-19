@@ -2,7 +2,7 @@ const colors = require('colors')
 
 let logs = {
     error: (msg, options = {}) => {
-        let header = "[error]："
+        let header = options.noHeader ? "" : "[error]："
         logs.log('red', header + msg, options)
     },
     info: (msg, options = {}) => {

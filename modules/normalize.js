@@ -32,15 +32,12 @@ let normalizeSlot = template => {
     return template
 }
 
-// 标准化自闭合元素<img/>,<TestComps />  为 <img></img> <TestComps></TestComps>
+// 标准化自闭合元素,目的是为了后面的正则表达式好写，<img/>,<TestComps />  为 <img></img> <TestComps></TestComps>
 let normalizeElement = template => {
     let reg = /(<)([^<>\n]+?)(\s?|\s+[^>]+?)(\/)(>)/gim
     template = template.replace(reg, (all, start, tagName, allAttr = '', diagonal, end) => {
         return `${start}${tagName}${allAttr}${end}${start}${diagonal}${tagName}${end}`
     })
-
-    // 特殊处理不需要/结束的img的自闭合标签
-
     return template
 }
 

@@ -31,11 +31,13 @@ const elementMap = {
     template: { tag: 'block' },
 
     // 表单
-
+    input: { tag: 'input' },
 }
 
 const specialElement = ['a']
+// 自闭合标签主要是这两个
+const selfClose = ['input', 'img']
 
 module.exports = {
-    elementMap, specialElement
+    elementMap, specialElement, selfClose
 }

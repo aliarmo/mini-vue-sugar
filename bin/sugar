@@ -55,9 +55,12 @@ function task() {
 }
 
 function action(filepath) {
-	let template = fs.readFileSync(filepath, 'utf-8')
-	filepath = filepath.replace(/\.vue$/, '.wxml')
-	fs.writeFileSync(filepath, compile(template))
+	// let template = fs.readFileSync(filepath, 'utf-8')
+	fs.readFile(filepath, (err, data) => {
+		let template = data.toString()
+		let afterPath = filepath.replace(/\.vue$/, '.wxml')
+		fs.writeFileSync(afterPath, compile(template, { filepath }))
+	})
 }
 
 commander
@@ -91,7 +94,7 @@ commander
 commander
 	.command('*')
 	.action(function (task) {
-
+		task()
 	})
 
 commander.parse(process.argv)
@@ -99,4 +102,5 @@ commander.parse(process.argv)
 
 if (!commander.args.length) {
 	// 没有参数的时候
+	task()
 }

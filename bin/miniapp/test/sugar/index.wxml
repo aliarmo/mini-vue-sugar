@@ -1,0 +1,20 @@
+<view>
+    <view class="header {{isActive ? 'active' : ''}}"       >
+      <view>我是头部</view>
+      <view>{{username}}</view>
+      <view>啦啦啦啦啦啦</view>
+    </view>
+
+    <view  data-name="{{username}}"   bindtap="onClick" >
+      <view>{{password}}</view>
+    </view>
+
+    <TestComps bindtest="onTest">
+      <block v-slot>
+        <view>我是默认slot</view>
+      </block>
+      
+        <view slot='header'>我是header slot</view>
+      
+    </TestComps>
+  </view>

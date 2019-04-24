@@ -7,16 +7,20 @@ const chokidar = require('chokidar')
 const commander = require('commander')
 const path = require('path')
 const fs = require('fs')
-let { info } = require('../modules/log')
+let request = require('request')
+// request.debug = true
+
+let { info, error } = require('../modules/log')
 let { compile } = require('../modules/index')
-let { fileExistsSync } = require('../modules/utils')
+let { fileExistsSync, exit } = require('../modules/utils')
 let meta = require('../package.json')
 let cwd = process.cwd()
 
 const sugarConfigFileName = 'sugar.config.json'
 let log = info
 let hasWatch = false
-
+let DEFAULT_PROJECT_NAME = 'miniapp'
+const downloadUrl = 'https://github.com/aliarmo/mini-vue-sugar/archive/master.zip'
 let sugarConfig = {}
 try {
 	sugarConfig = require(path.resolve(sugarConfigFileName))
@@ -62,8 +66,7 @@ function action(filepath) {
 		let prefix = filepath.replace(/\.vue$/, '')
 		let { template, style, script, json } = compile(content, { filepath })
 		// .wxml
-		fs.writeFileSync(`${prefix}.wxml`, template || '')
-
+		template && fs.writeFileSync(`${prefix}.wxml`, template)
 		// .wxss
 		style && fs.writeFileSync(`${prefix}.wxss`, style)
 
@@ -73,6 +76,7 @@ function action(filepath) {
 		// .json
 		let jsonPath = `${prefix}.json`
 		let exitJson = {}
+		let isComponent = /Component\(\{/.test(script)
 		if (fileExistsSync(jsonPath)) {
 			try {
 				delete require.cache[jsonPath]   // 注意require是会缓存的，这里删除缓存，因为json里面肯定不会require其他文件，所以就没递归删除
@@ -86,12 +90,58 @@ function action(filepath) {
 		if (!Object.keys(using).length) {
 			delete exitJson['usingComponents']
 		}
+		if (isComponent && !exitJson.component) {
+			exitJson.component = true
+		}
 		fs.writeFileSync(jsonPath, JSON.stringify(exitJson))
+	})
+}
+let decompress = require('decompress')
+let os = require('os')
+let rimraf = require('rimraf')
+let osTempPath = os.tmpdir()
+let zipName = 'mini-vue-sugar-master'
+function download(projectName) {
+	let destDir = path.join(__dirname, projectName)
+	let tempPath = path.join(osTempPath, `${zipName}.zip`)
+	if (fileExistsSync(destDir)) {
+		error(`exist project ${projectName} in ${__dirname}`)
+		exit()
+		return
+	}
+	let writeStream = fs.createWriteStream(tempPath)
+	request.get({
+		// url: 'http://127.0.0.1:3000/download/mini-vue-sugar-master.zip'
+		url: 'http://127.0.0.1:3000/download/mini-vue-sugar-master.zip'
+	}).pipe(writeStream)
+	writeStream.on('finish', () => {
+		decompress(tempPath, __dirname).then(files => {
+			rimraf(tempPath, err => {
+				err && error(`rm ${tempPath} fail\n${err}`)
+			})
+			fs.rename(path.join(__dirname, zipName), destDir, err => {
+				if (err) {
+					error(`create ${projectName},please try again later\n${err}`)
+				} else {
+					console.log(`~~~~~~~~~create ${projectName} done`)
+				}
+			})
+		})
 	})
 }
 
 commander
 	.version(`v${meta.version}`, '-v, --version')
+
+//sugar i
+commander
+	.command('init [name]')
+	.alias('i')
+	.description('init an miniapp project using provided name')
+	.action(function (name, cmd) {
+		// cmd是commander对象
+		download(name || DEFAULT_PROJECT_NAME)
+	})
 
 //sugar c
 commander

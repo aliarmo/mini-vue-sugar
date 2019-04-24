@@ -1,0 +1,6 @@
+<block>
+  <view>
+    <view v-once></view>
+    <TestComps v-once></TestComps>
+  </view>
+</block>

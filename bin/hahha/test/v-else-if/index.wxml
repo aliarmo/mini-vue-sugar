@@ -1,0 +1,7 @@
+<block>
+  <view>
+    <view wx:elif="{{isShow}}"></view>
+    <view wx:elif="{{true}}"></view>
+    <view wx:elif="{{'1'}}"></view>
+  </view>
+</block>

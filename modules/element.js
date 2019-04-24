@@ -12,11 +12,11 @@ let deltElement = (template) => {
         template = template.replace(selfCloseTagReg, '')
     })
     Object.keys(elementMap).forEach(key => {
-        tagReg = new RegExp(`(<|<\\/)(${key})([\\s\\S]*?)(>)`, 'gim')
-        template = template.replace(tagReg, (all, start, tag, allAttr = '', end) => {
+        tagReg = new RegExp(`(<|<\\/)(${key})((\\/?>)|\\s+([\\s\\S]*?)(>))`, 'gim')
+        template = template.replace(tagReg, (all, start, tag, rest, firstMayEnd, allAttr = '', lastMayEnd) => {
             target = elementMap[key]
             // 某些tag的属性需要特别处理
-            if (~specialElement.indexOf(key)) {
+            if (!firstMayEnd && ~specialElement.indexOf(key)) {
                 target.attrs && Object.keys(target.attrs).forEach(originAttr => {
                     attrReg = new RegExp(`${originAttr}`, 'gim')
                     allAttr = allAttr.replace(attrReg, target.attrs[originAttr])
@@ -25,11 +25,19 @@ let deltElement = (template) => {
             // 自闭合标签特殊处理
             let patchStr = ''
             if (~selfClose.indexOf(key)) {
-                allAttr = allAttr.replace(/\s+$/, '')
-                allAttr = allAttr.replace(/\/$/, '')
-                patchStr = `</${target}>`
+                if (!firstMayEnd) {
+                    allAttr = allAttr.replace(/\s+$/, '')   // 去掉多余空格
+                    allAttr = allAttr.replace(/\/$/, '')    // 去掉/
+                } else {
+                    firstMayEnd = firstMayEnd.replace(/\//, '')
+                }
+                patchStr = `</${target.tag}>`
             }
-            return `${start}${target.tag}${allAttr}${end}${patchStr}`
+            if (firstMayEnd) {
+                return `${start}${target.tag}${firstMayEnd}${patchStr}`
+            } else {
+                return `${start}${target.tag} ${allAttr}${lastMayEnd}${patchStr}`
+            }
         })
     })
     return template

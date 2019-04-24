@@ -8,9 +8,9 @@
 1. 像mpvue这些框架，加入了vue的运行时，很重，侵入性太强，再者说小程序的逻辑层本身就与vue类似，基本满足开发需要
 2. 简单，只做编译，只要会写vue模板就行
 
-## 用法
+## 用法一，开启一个新项目
 1. npm i mini-vue-sugar -g
-2. sugar init   // 会生成一个默认叫miniapp小程序项目
+2. sugar i 或者 sugar init   // 会生成一个默认叫miniapp小程序项目，也可指定名称 sugar i my-project
 3. cd miniapp
 4. 在vue文件里面写模板，js，style，如：
     ```vue
@@ -44,7 +44,8 @@
     </template>
 
     <script>
-        import TestComps from './tets3.vue'    // **引入自定义组件，会自动生成json文件的usingComponents配置**
+        import TestComps from './test.vue'    // **引入自定义组件，会自动生成json文件的usingComponents配置**
+        import TestComps from '/component/test1/test1.vue'
 
         let app=getApp()
         import utils from '../modules/utils'   // 引入模块js
@@ -78,6 +79,10 @@
     ```
 5. sugar    // 会编译并watch所有.vue文件，最终在.vue的同目录下生成小程序所需的.js、.wxml、.wxss、.json文件
 
+## 用法二，接入已存在项目
+1. npm i mini-vue-sugar -g
+2. 切换到已存在项目目录下，执行 sugar
+3. 新建.vue文件，写模板和业务逻辑，一保存你就会发现多出小程序所需的.js、.wxml、.wxss、.json文件
 
 ## 原理
 1. 依次读取每个.vue文件，然后解析文件里面的template，script，style

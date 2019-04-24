@@ -24,11 +24,11 @@ let { getMiniEventName, mergeSpecial } = require('./event-config')
 let log = require('./log')
 
 let genReg = dirName => {
-    return new RegExp(`(${dirName})(\\s*=\\s*)(['"])([\\s\\S]*?)(\\3)([\\s>])`, 'gim')
+    return new RegExp(`(\\s+)(${dirName})(\\s*=\\s*)(['"])([\\s\\S]*?)(\\4)([\\s>])`, 'gim')
 }
 
 let genCntReg = dirName => {
-    return new RegExp(`(${dirName})(\\s*=\\s*)(['"]{1,})([\\s\\S]*?)(['"]{1,})(>|[\\s\\S]+?>)([\\s\\S]*?)(<)`, 'gim')
+    return new RegExp(`(\\s+)(${dirName})(\\s*=\\s*)(['"]{1,})([\\s\\S]*?)(['"]{1,})(>|[\\s\\S]+?>)([\\s\\S]*?)(<)`, 'gim')
 }
 
 // 注意字面量case，如：v-text="'哈哈哈哈'"
@@ -36,19 +36,19 @@ let deltText = template => {
     let dir = 'v-text'
     let isConst
     let dirReg
-    template = template.replace(genCntReg(dir), (all,
+    template = template.replace(genCntReg(dir), (all, space,
         dirName, equalStr, leftMark, exp, rightMark, otherCnt,
         detail, end) => {
         isConst = leftMark.length > 1
         detail = isConst ? exp : `{{${exp}}}`
-        return `${otherCnt}${detail}${end}`
+        return `${space}${otherCnt}${detail}${end}`
     })
     return template
 }
 
 let deltHtml = template => {
     let dir = 'v-html'
-    let reg = new RegExp(`<[\\s\\S]+${dir}[\\s\\S]+>`)
+    let reg = new RegExp(`<[^>]+?\\s+${dir}[^>]+>`)
     let matched = template.match(reg)
     if (matched && matched[0]) {
         log.error(`小程序平台不支持 ${dir} \n`)
@@ -71,10 +71,11 @@ let deltShow = template => {
         }
         let allStyle = ''
         let dealMayAttr = mayAttr => {
-            return mayAttr.replace(/(style\s*=\s*)(["'])([\s\S]*?)(\2)/, (all, start,
+            // \s+很关键，要不然data-style也会被replace去掉
+            return mayAttr.replace(/(\s+)(style\s*=\s*)(["'])([\s\S]*?)(\2)/, (all, space, start,
                 leftMark, staticExp = "", rightMark) => {
                 allStyle += `${staticExp}${/;$/.test(staticExp) ? '' : ';'}`
-                return ''
+                return space || ''
             })
         }
         let deltLeftMayAttr = dealMayAttr(leftMayAttr)
@@ -88,7 +89,7 @@ let deltShow = template => {
 
 let deltIf = (template, options) => {
     let dir = 'v-if'
-    template = template.replace(genReg(dir), (all,
+    template = template.replace(genReg(dir), (all, space,
         dirName, equalStr, leftMark, exp = '', rightMark, end) => {
         if (!exp) {
             // throw new Error(`${dir} has not expression in ${all}}`)
@@ -97,14 +98,14 @@ let deltIf = (template, options) => {
             return all
         }
         exp = `{{${exp}}}`
-        return `wx:if${equalStr}${leftMark}${exp}${rightMark}${end}`
+        return `${space}wx:if${equalStr}${leftMark}${exp}${rightMark}${end}`
     })
     return template
 }
 
 let deltElseIf = (template, options) => {
     let dir = 'v-else-if'
-    template = template.replace(genReg(dir), (all,
+    template = template.replace(genReg(dir), (all, space,
         dirName, equalStr, leftMark, exp = '', rightMark, end) => {
         if (!exp) {
             log.error(`${dir} has not expression \n}`)
@@ -112,20 +113,23 @@ let deltElseIf = (template, options) => {
             return all
         }
         exp = `{{${exp}}}`
-        return `wx:elif${equalStr}${leftMark}${exp}${rightMark}${end}`
+        return `${space}wx:elif${equalStr}${leftMark}${exp}${rightMark}${end}`
     })
     return template
 }
 
 let deltElse = template => {
     let dir = 'v-else'
-    template = template.replace(dir, 'wx:else')
+    let reg = new RegExp(`(\\s+)${dir}`, 'gim')
+    template = template.replace(reg, (all, space) => {
+        return `${space}wx:else`
+    })
     return template
 }
 
 let deltFor = (template, options) => {
     let dir = 'v-for'
-    template = template.replace(genReg(dir), (all,
+    template = template.replace(genReg(dir), (all, space,
         dirName, equalStr, leftMark, exp = '', rightMark, end = '') => {
         if (!exp) {
             // throw new Error(`${dir} has not expression in ${all}}`)
@@ -148,15 +152,15 @@ let deltFor = (template, options) => {
         varList[1] = varList[1] || 'index'
         let index = `wx:for-index="${varList[1]}"`
         let item = `wx:for-item="${varList[0]}"`
-        return `wx:for${equalStr}${leftMark}${exp}${rightMark} ${item} ${index}${end}`
+        return `${space}wx:for${equalStr}${leftMark}${exp}${rightMark} ${item} ${index}${end}`
     })
     return template
 }
 
 let deltOn = (template, options) => {
     let dir = 'v-on'
-    let reg = new RegExp(`${dir}:([\\s\\S]+?)(\s*=\s*)(["'])([\\s\\S]+?)(\\3)`, 'gim')
-    template = template.replace(reg, (all, param, equalStr, leftMark, fn, rightMark) => {
+    let reg = new RegExp(`(\\s+)${dir}:([\\s\\S]+?)(\s*=\s*)(["'])([\\s\\S]+?)(\\4)`, 'gim')
+    template = template.replace(reg, (all, space, param, equalStr, leftMark, fn, rightMark) => {
         param = param.trim()
         if (/^\[/.test(param)) {
             // throw new Error(`小程序不支持动态事件：${all}`)
@@ -182,7 +186,7 @@ let deltOn = (template, options) => {
             log.warn(`小程序内只支持 stop 修饰符，其他修饰符将被忽略：\n`)
             log.warn(`at ${options.filepath ? options.filepath + ' ' : ''}${all}\n`)
         }
-        return `${prefix}${miniEventName}${equalStr}${leftMark}${fn}${rightMark}`
+        return `${space}${prefix}${miniEventName}${equalStr}${leftMark}${fn}${rightMark}`
     })
 
     return template
@@ -196,9 +200,12 @@ let deltBind = (template, options) => {
     template = template.replace(dirReg, (all,
         start, leftMayAttr = "", dirStart, bindName, equalStr, leftMark, exp, rightMark, rightMayAttr = "",
         end) => {
-        let mayReg = new RegExp(`(${dir}:)([\\s\\S]+?)(\\s*=\\s*)(['"])([\\s\\S]+?)(\\4)`, 'gim')
+        let mayReg = new RegExp(`([\\s\\r\\n]+)(${dir}:)([\\s\\S]+?)(\\s*=\\s*)(['"])([\\s\\S]+?)(\\5)`, 'gim')
         let dealMayAttr = mayAttr => {
-            return mayAttr.replace(mayReg, (all, dirStart, bindName, equalStr, leftMark, mayExp, rightMark) => {
+            if (!/^[\s\r\n]/.test(mayAttr)) {
+                mayAttr = ' ' + mayAttr
+            }
+            return mayAttr.replace(mayReg, (all, space, dirStart, bindName, equalStr, leftMark, mayExp, rightMark) => {
                 bindName = bindName.trim()
                 if (bindName.split('.').length > 1) {
                     // 说明带了修饰符，编译器支持不了修饰符
@@ -225,16 +232,16 @@ let deltBind = (template, options) => {
                             })
                             return `{{${keys[1]} ? '${keys[0]}' : ''}}`
                         })
-                        return `class="${parsed.join(' ')}"`
+                        return `${space}class="${parsed.join(' ')}"`
                     } else if (isConst) {
-                        return `class="${mayExp}"`
+                        return `${space}class="${mayExp}"`
                     } else if (/^\[/.test(mayExp)) {
                         // v-bind:class="[activeClass, errorClass]"
                         log.error(`小程序平台不支持 v-bind:class="[activeClass, errorClass]"形式class绑定：\n`)
                         log.error(`at ${options.filepath ? options.filepath + ' ' : ''}${all}\n`, { noHeader: true })
                         return all
                     } else {
-                        return `class="{{${mayExp}}}"`
+                        return `${space}class="{{${mayExp}}}"`
                     }
                 } else if (bindName == 'style') {
                     // v-bind:style="{ color: activeColor, fontSize: fontSize + 'px' }"
@@ -249,18 +256,18 @@ let deltBind = (template, options) => {
                             })
                             return `${keys[0]}:{{${keys[1]}}}`
                         })
-                        return `style="${parsed.join(';')}"`
+                        return `${space}style="${parsed.join(';')}"`
                     } else if (isConst) {
-                        return `style="${mayExp}"`
+                        return `${space}style="${mayExp}"`
                     } else if (/^\[/.test(mayExp)) {
                         log.error(`小程序平台不支持 v-bind:style="[baseStyles, overridingStyles]"形式style绑定：\n`)
                         log.error(`at ${options.filepath ? options.filepath + ' ' : ''}${all}\n`, { noHeader: true })
                         return all
                     } else {
-                        return `style="{{${mayExp}}}"`
+                        return `${space}style="{{${mayExp}}}"`
                     }
                 } else {
-                    return `${bindName}${equalStr}${leftMark}{{${mayExp}}}${rightMark}`
+                    return `${space}${bindName}${equalStr}${leftMark}{{${mayExp}}}${rightMark}`
                 }
             })
         }
@@ -280,7 +287,7 @@ let deltBind = (template, options) => {
 // 小程序不支持作用域插槽
 let deltSlot = (template, options) => {
     let dir = 'v-slot'
-    let unSupportReg = new RegExp(`${dir}\\s*:\\s*[^>]+?\\s*=(["'])[^>]+?(\\1)`)
+    let unSupportReg = new RegExp(`\\s+${dir}\\s*:\\s*[^>]+?\\s*=(["'])[^>]+?(\\1)`)
     let matches = template.match(unSupportReg)
     if (matches) {
         // throw new Error(`小程序不支持作用域插槽：${matches[0]}`) v-slot:header="props"
@@ -305,7 +312,7 @@ let deltSlot = (template, options) => {
 
 let deltPre = (template, options) => {
     let dir = 'v-pre'
-    let reg = new RegExp(`<[\\s\\S]+${dir}[\\s\\S]+>`)
+    let reg = new RegExp(`<[^>]+?\\s+${dir}[^>]+>`)
     let matched = template.match(reg)
     if (matched && matched[0]) {
         // throw new Error(`小程序平台不支持 ${dir} ：${matched[0]}`)
@@ -317,7 +324,7 @@ let deltPre = (template, options) => {
 
 let deltCloak = (template, options) => {
     let dir = 'v-cloak'
-    let reg = new RegExp(`<[\\s\\S]+${dir}[\\s\\S]+>`)
+    let reg = new RegExp(`<[^>]+?\\s+${dir}[^>]+>`)
     let matched = template.match(reg)
     if (matched && matched[0]) {
         // throw new Error(`小程序平台不支持 ${dir} ：${matched[0]}`)
@@ -329,7 +336,7 @@ let deltCloak = (template, options) => {
 
 let deltOnce = (template, options) => {
     let dir = 'v-once'
-    let reg = new RegExp(`<[\\s\\S]+${dir}[\\s\\S]+>`)
+    let reg = new RegExp(`<[^>]+?\\s+${dir}[^>]+>`)
     let matched = template.match(reg)
     if (matched && matched[0]) {
         // throw new Error(`小程序平台不支持 ${dir} ：${matched[0]}`)
@@ -358,7 +365,7 @@ let deltModel = (template, options) => {
     //     }
     //     return `value="{{${exp}}} bind${eventName}="`
     // })
-    let reg = new RegExp(`<[\\s\\S]+${dir}[\\s\\S]+>`)
+    let reg = new RegExp(`<[^>]+?\\s+${dir}[^>]+>`)
     let matched = template.match(reg)
     if (matched && matched[0]) {
         // throw new Error(`小程序平台不支持 ${dir} ：${matched[0]}，可以通过 @change="handler" :value="val" 实现`)
@@ -369,6 +376,17 @@ let deltModel = (template, options) => {
     }
     return template
 }
+
+// key="{{index}}" 要转换为wx:key="{{index}}"
+let deltKey = (template, options) => {
+    let reg = /\s+key=(['"])\s*\{\{[\s\S]+?\}\}(\1)/gim
+    template = template.replace(reg, all => {
+        all = all.trim()
+        return ` wx:${all}`
+    })
+    return template
+}
+
 let deltDirective = (template, options) => {
     let temp = deltText(template, options)
     temp = deltHtml(temp, options)
@@ -385,6 +403,9 @@ let deltDirective = (template, options) => {
     temp = deltCloak(temp, options)
     temp = deltOnce(temp, options)
     temp = deltModel(temp, options)
+
+    // final deal with key
+    temp = deltKey(temp, options)
 
     return temp
 }
@@ -406,4 +427,5 @@ module.exports = {
     deltCloak,
     deltOnce,
     deltModel,
+    deltKey
 }

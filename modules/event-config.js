@@ -29,14 +29,14 @@ let getEventPrefix = decorator => {
 }
 // /;$/.test(cnt) ? cnt : cnt + ';'
 let mergeClass = (start = '', end = '') => {
-    let reg = /class=["'][^=]*["']/gim
+    let reg = /\s+class=["'][^=]*["']/gim
     let startMatches = start.match(reg) || []
     reg.lastIndex = 0
     let endMatches = end.match(reg) || []
     reg.lastIndex = 0
     let hasClass = false
     let allClass = startMatches.concat(endMatches).map(str => {
-        return str.replace(/class=["']([\s\S]*)["']/im, (all, cnt) => {
+        return str.replace(/\s+class=["']([\s\S]*)["']/im, (all, cnt) => {
             cnt = cnt.trim()
             hasClass = true
             return cnt
@@ -46,18 +46,18 @@ let mergeClass = (start = '', end = '') => {
     start = start.replace(reg, '')
     reg.lastIndex = 0
     end = end.replace(reg, '')
-    return `class="${allClass}" ${start} ${end}`
+    return ` class="${allClass}" ${start} ${end}`
 }
 
 let mergeStyle = (start = '', end = '') => {
-    let reg = /style=["'][^=]*["']/gim
+    let reg = /\s+style=["'][^=]*["']/gim
     let startMatches = start.match(reg) || []
     reg.lastIndex = 0
     let endMatches = end.match(reg) || []
     let hasStyle = false
     reg.lastIndex = 0
     let allStyle = startMatches.concat(endMatches).map(str => {
-        return str.replace(/style=["']([\s\S]*)["']/im, (all, cnt) => {
+        return str.replace(/\s+style=["']([\s\S]*)["']/im, (all, cnt) => {
             cnt = cnt.trim()
             hasStyle = true
             return cnt
@@ -67,7 +67,7 @@ let mergeStyle = (start = '', end = '') => {
     start = start.replace(reg, '')
     reg.lastIndex = 0
     end = end.replace(reg, '')
-    return `style="${allStyle}" ${start} ${end}`
+    return ` style="${allStyle}" ${start} ${end}`
 }
 
 /**

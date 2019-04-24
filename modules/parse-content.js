@@ -1,7 +1,11 @@
 let log = require('./log')
 
 module.exports = (content, opts) => {
-    let result = {}
+    let result = {
+        template: '',
+        style: '',
+        script: ''
+    }
     content = content.trim()
     if (!content) return result
     // deal template

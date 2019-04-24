@@ -1,13 +1,3 @@
-<block>
-  <view>
-    <view
-      style="fontSize:{{fontSize+'px'}};display:block;color:red" class="username {{test}}"     
-      data-username="{{username+'aaaaa'}}"
-      
-      
-      
-     ></view>
-    <view  key="{{item.id}}"   ></view>
-    <view class="header {{isActive ? 'active' : ''}}"       >aaaaaaa</view>
+<view>
+    <view wx:key="{{item.id}}"    ></view>
   </view>
-</block>

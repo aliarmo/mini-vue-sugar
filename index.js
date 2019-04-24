@@ -1,3 +1,15 @@
-let { compile } = require('./modules/index')
+let {
+    parseTemplate,
+    parseStyle,
+    parseScript,
+    parseContent,
+    compile
+} = require('./modules/index')
 
-module.exports = { compile }
+module.exports = {
+    parseTemplate,
+    parseStyle,
+    parseScript,
+    parseContent,
+    compile
+}

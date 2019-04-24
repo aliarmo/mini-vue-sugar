@@ -1,5 +1,4 @@
-<block>
-  <view>
+<view>
     <view class="header {{isActive ? 'active' : ''}}"       >
       <view>我是头部</view>
       <view>{{username}}</view>
@@ -19,4 +18,3 @@
       
     </TestComps>
   </view>
-</block>

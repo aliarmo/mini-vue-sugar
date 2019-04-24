@@ -9,6 +9,7 @@ const path = require('path')
 const fs = require('fs')
 let { info } = require('../modules/log')
 let { compile } = require('../modules/index')
+let { fileExistsSync } = require('../modules/utils')
 let meta = require('../package.json')
 let cwd = process.cwd()
 
@@ -57,9 +58,35 @@ function task() {
 function action(filepath) {
 	// let template = fs.readFileSync(filepath, 'utf-8')
 	fs.readFile(filepath, (err, data) => {
-		let template = data.toString()
-		let afterPath = filepath.replace(/\.vue$/, '.wxml')
-		fs.writeFileSync(afterPath, compile(template, { filepath }))
+		let content = data.toString()
+		let prefix = filepath.replace(/\.vue$/, '')
+		let { template, style, script, json } = compile(content, { filepath })
+		// .wxml
+		fs.writeFileSync(`${prefix}.wxml`, template || '')
+
+		// .wxss
+		style && fs.writeFileSync(`${prefix}.wxss`, style)
+
+		// .js
+		script && fs.writeFileSync(`${prefix}.js`, script)
+
+		// .json
+		let jsonPath = `${prefix}.json`
+		let exitJson = {}
+		if (fileExistsSync(jsonPath)) {
+			try {
+				delete require.cache[jsonPath]   // 注意require是会缓存的，这里删除缓存，因为json里面肯定不会require其他文件，所以就没递归删除
+				exitJson = require(jsonPath)
+			} catch (e) { }
+		}
+		let using = exitJson['usingComponents'] || (exitJson['usingComponents'] = {})
+		json.forEach(({ compsName, filepath }) => {
+			using[compsName] = filepath
+		})
+		if (!Object.keys(using).length) {
+			delete exitJson['usingComponents']
+		}
+		fs.writeFileSync(jsonPath, JSON.stringify(exitJson))
 	})
 }
 

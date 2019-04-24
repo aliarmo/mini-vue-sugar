@@ -1,23 +1,25 @@
-let { deltElement } = require('./element')
-let { deltDirective } = require('./directive')
-let { normalize } = require('./normalize')
-let { isTemplateLegal } = require('./validate')
-let { exit } = require('./utils')
-let deltInvoke = require('./delt-invoke')
+let parseTemplate = require('./parse-template')
+let parseStyle = require('./parse-style')
+let parseScript = require('./parse-script')
+let parseContent = require('./parse-content')
 
-let compile = (template, options = { filepath: '' }) => {
-    template = template.trim()
-    if (!template) return ''
-    if (!isTemplateLegal(template, options)) {
-        exit()
-        return
+let compile = (content = '', options = { filepath: '' }) => {
+    let parsed = parseContent(content, options)
+    let { template } = parseTemplate(parsed.template, options)
+    let { script, json } = parseScript(parsed.script, options)
+    let { style } = parseStyle(parsed.style, options)
+    return {
+        template, style,
+        script, json
     }
-    let temp = normalize(template, options)
-    temp = deltElement(deltDirective(temp, options), options)
-    temp = deltInvoke(temp, options)
-    return temp
 }
 
+
+
 module.exports = {
+    parseTemplate,
+    parseStyle,
+    parseScript,
+    parseContent,
     compile
 }

@@ -20,7 +20,7 @@ const sugarConfigFileName = 'sugar.config.json'
 let log = info
 let hasWatch = false
 let DEFAULT_PROJECT_NAME = 'miniapp'
-const downloadUrl = 'https://github.com/aliarmo/mini-vue-sugar/archive/master.zip'
+const downloadUrl = 'https://github.com/aliarmo/mini-vue-sugar-template/archive/master.zip'
 let sugarConfig = {}
 try {
 	sugarConfig = require(path.resolve(sugarConfigFileName))
@@ -111,8 +111,8 @@ function download(projectName) {
 	}
 	let writeStream = fs.createWriteStream(tempPath)
 	request.get({
+		url: downloadUrl
 		// url: 'http://127.0.0.1:3000/download/mini-vue-sugar-master.zip'
-		url: 'http://127.0.0.1:3000/download/mini-vue-sugar-master.zip'
 	}).pipe(writeStream)
 	writeStream.on('finish', () => {
 		decompress(tempPath, __dirname).then(files => {

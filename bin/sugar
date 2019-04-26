@@ -102,7 +102,7 @@ let rimraf = require('rimraf')
 let osTempPath = os.tmpdir()
 let zipName = 'mini-vue-sugar-master'
 function download(projectName) {
-	let destDir = path.join(__dirname, projectName)
+	let destDir = path.resolve(projectName)
 	let tempPath = path.join(osTempPath, `${zipName}.zip`)
 	if (fileExistsSync(destDir)) {
 		error(`exist project ${projectName} in ${__dirname}`)

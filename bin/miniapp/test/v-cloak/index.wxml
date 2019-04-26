@@ -1,5 +1,0 @@
-<block>
-  <view>
-    <view v-cloak></view>
-  </view>
-</block>

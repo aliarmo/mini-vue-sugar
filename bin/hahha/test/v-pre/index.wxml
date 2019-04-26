@@ -1,6 +1,0 @@
-<block>
-  <view>
-    <view v-pre></view>
-    <TestComps v-pre></TestComps>
-  </view>
-</block>

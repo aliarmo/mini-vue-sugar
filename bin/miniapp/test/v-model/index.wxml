@@ -1,5 +1,0 @@
-<block>
-  <view>
-    <input v-model="username">
-  </view>
-</block>

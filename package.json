@@ -1,6 +1,6 @@
 {
   "name": "mini-vue-sugar",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "using vue syntax in mini app",
   "main": "index.js",
   "scripts": {

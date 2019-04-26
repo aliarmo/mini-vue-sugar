@@ -112,8 +112,8 @@ function download(projectName) {
 	}
 	let writeStream = fs.createWriteStream(tempPath)
 	request.get({
-		// url: downloadUrl
-		url: 'http://127.0.0.1:3000/download/mini-vue-sugar-master.zip'
+		url: downloadUrl
+		// url: 'http://127.0.0.1:3000/download/mini-vue-sugar-master.zip'
 	})
 		.on('error', function (err) {
 			err && error(`download fail,please check your network or you are behind a proxy\n${err}`)

@@ -254,7 +254,7 @@ let deltBind = (template, options) => {
                             keys = keys.split(':').map(key => {
                                 return key.trim()
                             })
-                            return `${keys[0]}:{{${keys[1]}}}`
+                            return `${keys[0]}:{{${keys.slice(1).join(':')}}}`
                         })
                         return `${space}style="${parsed.join(';')}"`
                     } else if (isConst) {

@@ -102,3 +102,5 @@
 ## TODO-LIST
 1. 美化生成的小程序模板，目前有很多空格，换行没有去掉
 2. 解析出的js添加v-model等的实现，需要的同学提issue，我会考虑实现，这里可想象空间还很多
+3. 样式由驼峰转由-分隔，marginTop转margin-top
+4. 可以考虑支持 v-bind:class="[activeClass, errorClass]"

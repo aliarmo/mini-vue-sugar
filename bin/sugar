@@ -101,12 +101,14 @@ let os = require('os')
 let rimraf = require('rimraf')
 let osTempPath = os.tmpdir()
 let zipName = 'mini-vue-sugar-master'
+const remoteProjectName='mini-vue-sugar-template-master'
 function download(projectName) {
-	let cwd = path.resolve()
+	console.log('waiting..........')
 	let destDir = path.resolve(projectName)
+	let cwd=process.cwd()
 	let tempPath = path.join(osTempPath, `${zipName}.zip`)
 	if (fileExistsSync(destDir)) {
-		error(`exist project ${projectName} in ${cwd}`)
+		error(`exist project ${projectName} in ${__dirname},you can name another project name,like: sugar i test`)
 		exit()
 		return
 	}
@@ -114,26 +116,19 @@ function download(projectName) {
 	request.get({
 		url: downloadUrl
 		// url: 'http://127.0.0.1:3000/download/mini-vue-sugar-master.zip'
-	})
-		.on('error', function (err) {
-			err && error(`download fail,please check your network or you are behind a proxy\n${err}`)
-			log(`you can clone the init project at https://github.com/aliarmo/mini-vue-sugar-template \n`)
-			exit()
-		})
-		.pipe(writeStream)
-
+	}).pipe(writeStream)
 	writeStream.on('finish', () => {
 		decompress(tempPath, cwd).then(files => {
 			rimraf(tempPath, err => {
 				err && error(`rm ${tempPath} fail\n${err}`)
 			})
-			fs.rename(path.resolve(cwd, zipName), destDir, err => {
+			fs.rename(path.join(cwd, remoteProjectName), destDir, err => {
 				if (err) {
-					error(`create ${projectName} fail,please try again later\n${err}`)
+					error(`create ${projectName},please try again later\n${err}`)
 				} else {
-					console.log(`~~~~~~~~~create ${projectName} successfully`)
+					console.log(`~~~~~~~~~create ${projectName} done`)
+					exit()
 				}
-				exit()
 			})
 		})
 	})
@@ -149,9 +144,7 @@ commander
 	.description('init an miniapp project using provided name')
 	.action(function (name, cmd) {
 		// cmd是commander对象
-		name = name || DEFAULT_PROJECT_NAME
-		log(`starting init ${name} project,may take a few minutes,waitting \n`)
-		download(name)
+		download(name || DEFAULT_PROJECT_NAME)
 	})
 
 //sugar c

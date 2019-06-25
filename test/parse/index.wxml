@@ -1,0 +1,4 @@
+<view class="box">
+    <view id="content">aaaaaaaaaaaaa</view>
+    <TestComps></TestComps>
+  </view>

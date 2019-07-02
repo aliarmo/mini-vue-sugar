@@ -1,9 +1,7 @@
-<block>
-  <view>
-    <view  style="color:red;font-size:16px;display:{{username?'block':'none'}};"  ></view>
-    <view  style="color:red;font-size:16px;display:{{username?'block':'none'}};;{{styleObj}}"         ></view>
-    <view  style="color:red;font-size:16px;display:{{username?'block':'none'}};;width:{{width}}"         ></view>
-    <view  style="display:{{true?'block':'none'}};" ></view>
-    <view  style="display:{{'啦啦啦啦啦啦'?'block':'none'}};" ></view>
+<view>
+    <view style="display:{{username?'block':'none'}};"  style="color:red;font-size:16px"></view>
+    <view style="color:red;font-size:16px" v-bind:;display:{{username?'block':'none'}};"  "styleObj"></view>
+    <view style="color:red;font-size:16px" v-bind:;display:{{username?'block':'none'}};"  "{width:width}"></view>
+    <view style="display:{{true?'block':'none'}};" ></view>
+    <view style="display:{{'啦啦啦啦啦啦'?'block':'none'}};" ></view>
   </view>
-</block>

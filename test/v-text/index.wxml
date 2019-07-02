@@ -1,6 +1,4 @@
-<block>
-  <view>
+<view>
     <view >{{username}}</view>
     <view >啦啦啦啦啦啦</view>
   </view>
-</block>

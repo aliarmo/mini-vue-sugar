@@ -1,5 +1,4 @@
-<block>
-  <view>
+<view>
     <TestComps>
       
         <view slot='header'>我是header slot</view>
@@ -13,4 +12,3 @@
       <view>我是头部default slot</view>
     </TestComps>
   </view>
-</block>

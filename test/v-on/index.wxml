@@ -1,5 +1,4 @@
-<block>
-  <view>
+<view>
     <view>
       <view>good case</view>
       <view bindtap="onClick"></view>
@@ -16,4 +15,3 @@
       <view v-on:click="onClick('t')"></view>
     </view>
   </view>
-</block>

@@ -1,6 +1,8 @@
-let parse = require('../../modules/parse-content')
-let fs = require('fs')
-
-let content = fs.readFileSync('./index.vue', 'utf-8')
-
-console.log(parse(content))
+Compoennt({
+  data() {
+    return {
+      username: "aliarmo",
+      password: "123"
+    };
+  }
+});

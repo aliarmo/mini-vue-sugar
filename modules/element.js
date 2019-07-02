@@ -8,7 +8,7 @@ let deltElement = (template) => {
     if (!template) return ''
     // 去掉自闭合标签的关闭标签，例如：</img>
     selfClose.forEach(tag => {
-        selfCloseTagReg = new RegExp(`<\\s*\\/${selfCloseTagReg}\\s*>`, 'gim')
+        selfCloseTagReg = new RegExp(`<\\s*\\/${tag}\\s*>`, 'gim')
         template = template.replace(selfCloseTagReg, '')
     })
     Object.keys(elementMap).forEach(key => {

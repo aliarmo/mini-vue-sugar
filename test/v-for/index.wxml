@@ -1,8 +1,6 @@
-<block>
-  <view>
-    <view wx:for="{{lists}}"  wx:for-item='list' wx:for-index='index' key="{{index}}"   >{{list.title}}</view>
+<view>
+    <view wx:for="{{lists}}" wx:for-item="list" wx:for-index="index" wx:key="{{index}}"    >{{list.title}}</view>
     <view>
-      <view wx:for="{{[12,34,45,56]}}"  wx:for-item='numer' wx:for-index='index' key="{{index}}"   >{{number}}</view>
+      <view wx:for="{{[12,34,45,56]}}" wx:for-item="numer" wx:for-index="index" wx:key="{{index}}"    >{{number}}</view>
     </view>
   </view>
-</block>

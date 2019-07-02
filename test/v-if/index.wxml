@@ -1,7 +1,5 @@
-<block>
-  <view>
+<view>
     <view wx:if="{{isShow}}"></view>
     <view wx:if="{{true}}"></view>
     <TestComps wx:if="{{'1'}}"></TestComps>
   </view>
-</block>

@@ -29,14 +29,14 @@ let getEventPrefix = decorator => {
 }
 // /;$/.test(cnt) ? cnt : cnt + ';'
 let mergeClass = (start = '', end = '') => {
-    let reg = /\s+class=["'][^=]*["']/gim
+    let reg = /\s+class=(["'])[\s\S]*?(\1)/gim
     let startMatches = start.match(reg) || []
     reg.lastIndex = 0
     let endMatches = end.match(reg) || []
     reg.lastIndex = 0
     let hasClass = false
     let allClass = startMatches.concat(endMatches).map(str => {
-        return str.replace(/\s+class=["']([\s\S]*)["']/im, (all, cnt) => {
+        return str.replace(/\s+class=(["'])([\s\S]*)(\1)/im, (all, left, cnt) => {
             cnt = cnt.trim()
             hasClass = true
             return cnt

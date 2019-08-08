@@ -230,7 +230,9 @@ let deltBind = (template, options) => {
                             keys = keys.split(':').map(key => {
                                 return key.trim()
                             })
-                            return `{{${keys[1]} ? '${keys[0]}' : ''}}`
+                            let keyVal = keys[0] || ''
+                            keyVal = /^['"]/.test(keyVal) ? keyVal : `'${keyVal}'`
+                            return `{{${keys[1]} ? ${keyVal} : ''}}`
                         })
                         return `${space}class="${parsed.join(' ')}"`
                     } else if (isConst) {
@@ -276,7 +278,6 @@ let deltBind = (template, options) => {
         let deltRightMayAttr = dealMayAttr(rightMayAttr)   // 处理右边bind
         mayReg.lastIndex = 0
         let middle = dealMayAttr(`${dirStart}${bindName}${equalStr}${leftMark}${exp}${rightMark}`)
-
         let merged = mergeSpecial(mergeSpecial(deltLeftMayAttr, middle), deltRightMayAttr)
 
         return `${start}${merged}${end}`

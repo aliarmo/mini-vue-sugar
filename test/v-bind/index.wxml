@@ -1,3 +1,6 @@
-<view>
-    <view class="2222222222 {{num==11 ? 'red' : ''}}" wx:key="{{item.id}}"   ></view>
+<view class="mod_box _short_video">
+    <view style="top:{{top + 'px'}};left:{{left + 'px'}};display:{{isShowPlayer ? 'block':'none'}}"  class="short-video-container"  
+     >
+      <TxvPlayer  wx:if="{{vid}}"   vid="{{vid}}"    ></TxvPlayer>
+    </view>
   </view>

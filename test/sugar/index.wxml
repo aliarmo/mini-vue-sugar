@@ -5,7 +5,7 @@
       <view>啦啦啦啦啦啦</view>
     </view>
 
-    <view data-name="{{username}}"   bindtap="onClick" >
+    <view :data-name="username" bindtap="onClick">
       <view>{{password}}</view>
     </view>
 

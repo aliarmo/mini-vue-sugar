@@ -14,7 +14,7 @@ let normalizeEvent = template => {
 let normalizeBind = template => {
     let simbol = ':'
     let replaced = 'v-bind:'
-    let reg = new RegExp(`(\\s+)(${simbol})([\\s\\S]+?)(\\s*=\\s*['"]{1,})([\\s\\S]+?)(['"]{1,})`, 'gim')
+    let reg = new RegExp(`(\\s+)(${simbol})([\\S]+?)(\\s*=\\s*['"]{1,})([\\s\\S]+?)(['"]{1,})`, 'gim')
     template = template.replace(reg, (all, space, char, eventName, equalStr, exp, rightMark) => {
         return `${space}${replaced}${eventName}${equalStr}${exp}${rightMark}`
     })
